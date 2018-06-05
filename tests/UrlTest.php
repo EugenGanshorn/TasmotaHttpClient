@@ -1,6 +1,6 @@
 <?php
 
-class UrlTestTest extends PHPUnit\Framework\TestCase
+class UrlTest extends PHPUnit\Framework\TestCase
 {
     public function testUrlContainsIpAddress(): void
     {
