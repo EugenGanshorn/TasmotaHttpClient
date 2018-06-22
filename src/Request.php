@@ -57,6 +57,7 @@ class Request
     }
 
     /**
+     * @required
      * @param Client $client
      * @return Request
      */
@@ -75,6 +76,7 @@ class Request
     }
 
     /**
+     * @required
      * @param Url $url
      * @return Request
      */
