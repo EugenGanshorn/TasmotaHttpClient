@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
  * @method array Latitude(?string $value = null)
  * @method array Longitude(?string $value = null)
  * @method array Status(?integer $value = null)
+ * @method array Power(?integer $value = null)
  */
 class Request
 {
