@@ -49,7 +49,7 @@ class Request
      */
     public function __call(string $name, array $arguments): array
     {
-        return $this->send($this->url->build($name, array_shift($arguments)), array_shift($arguments));
+        return $this->send($this->url->build($name, array_shift($arguments)), $arguments ?? array_shift($arguments));
     }
 
     /**
