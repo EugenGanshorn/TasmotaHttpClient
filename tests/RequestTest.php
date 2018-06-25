@@ -15,7 +15,7 @@ class RequestTest extends PHPUnit\Framework\TestCase
             ->method('__call')
             ->with(
                 $this->equalTo('get'),
-                $this->equalTo(['http://tasmota.local'])
+                $this->equalTo(['http://tasmota.local', []])
             )
             ->willReturn(new Response(200, [], '{}'))
         ;
@@ -36,7 +36,7 @@ class RequestTest extends PHPUnit\Framework\TestCase
             ->method('__call')
             ->with(
                 $this->equalTo('get'),
-                $this->equalTo(['http://tasmota.local'])
+                $this->equalTo(['http://tasmota.local', []])
             )
             ->willReturn(new Response(200, [], '{"key": "value"}'))
         ;
@@ -57,7 +57,7 @@ class RequestTest extends PHPUnit\Framework\TestCase
             ->method('__call')
             ->with(
                 $this->equalTo('get'),
-                $this->equalTo(['http://tasmota.local'])
+                $this->equalTo(['http://tasmota.local', []])
             )
             ->willReturn(new Response(200, [], '{"key: "value"}'))
         ;
@@ -77,7 +77,7 @@ class RequestTest extends PHPUnit\Framework\TestCase
             ->method('__call')
             ->with(
                 $this->equalTo('get'),
-                $this->equalTo(['http://tasmota.local'])
+                $this->equalTo(['http://tasmota.local', []])
             )
             ->willReturn(new Response(200, [], '{"Command": "Unknown"}'))
         ;
