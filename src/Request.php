@@ -5,10 +5,10 @@ namespace TasmotaHttpClient;
 use GuzzleHttp\Client;
 
 /**
- * @method array Latitude(?string $value = null)
- * @method array Longitude(?string $value = null)
- * @method array Status(?integer $value = null)
- * @method array Power(?integer $value = null)
+ * @method array Latitude(?string $value = null, array $options = [])
+ * @method array Longitude(?string $value = null, array $options = [])
+ * @method array Status(?integer $value = null, array $options = [])
+ * @method array Power(?integer $value = null, array $options = [])
  */
 class Request
 {
@@ -24,12 +24,14 @@ class Request
 
     /**
      * @param string $url
+     * @param array  $options
+     *
      * @return array
      * @throws UnknownCommandException
      */
-    public function send(string $url): array
+    public function send(string $url, array $options = []): array
     {
-        $response = $this->client->get($url);
+        $response = $this->client->get($url, $options);
 
         $result = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
         if (!empty($result['Command']) && $result['Command'] === 'Unknown') {
@@ -47,7 +49,7 @@ class Request
      */
     public function __call(string $name, array $arguments): array
     {
-        return $this->send($this->url->build($name, array_shift($arguments)));
+        return $this->send($this->url->build($name, array_shift($arguments)), array_shift($arguments));
     }
 
     /**
