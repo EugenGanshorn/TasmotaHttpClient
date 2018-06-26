@@ -88,5 +88,4 @@ class RequestTest extends PHPUnit\Framework\TestCase
         $this->expectException(UnknownCommandException::class);
         $sut->send('http://tasmota.local');
     }
-
 }
