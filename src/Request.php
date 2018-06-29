@@ -9,6 +9,7 @@ use GuzzleHttp\Client;
  * @method array Longitude(?string $value = null, array $options = [])
  * @method array Status(?integer $value = null, array $options = [])
  * @method array Power(?integer $value = null, array $options = [])
+ * @method array Color(?string $value = null, array $options = [])
  * @method array Upgrade(?integer $value = null, array $options = [])
  * @method array OtaUrl(?string $value = null, array $options = [])
  */
