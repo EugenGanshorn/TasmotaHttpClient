@@ -10,11 +10,17 @@ class Url
 
     /**
      * @param string $command
-     * @param null|string $payload
+     * @param mixed $payload
      * @return string
      */
-    public function build(?string $command = null, ?string $payload = null): string
+    public function build(?string $command = null, $payload = null): string
     {
+        if (is_bool($payload)) {
+            $payload = (int) $payload;
+        }
+
+        $payload = (string) $payload;
+
         $httpData = [];
 
         $cmnd = trim(sprintf('%s %s', $command, $payload));

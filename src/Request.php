@@ -3,23 +3,27 @@
 namespace TasmotaHttpClient;
 
 use GuzzleHttp\Client;
+use function GuzzleHttp\Promise\all;
+use GuzzleHttp\Promise\PromiseInterface;
+use Psr\Http\Message\ResponseInterface;
 
 /**
- * @method array Latitude(?string $value = null, array $options = [])
- * @method array Longitude(?string $value = null, array $options = [])
- * @method array Status(?integer $value = null, array $options = [])
- * @method array Power(?integer $value = null, array $options = [])
- * @method array Color(?string $value = null, array $options = [])
- * @method array Color2(?string $value = null, array $options = [])
- * @method array CT(?int $value = null, array $options = [])
- * @method array Dimmer(?int $value = null, array $options = [])
- * @method array Fade(?bool $value = null, array $options = [])
- * @method array Speed(?int $value = null, array $options = [])
- * @method array LedTable(?bool $value = null, array $options = [])
- * @method array Wakeup(?int $value = null, array $options = [])
- * @method array WakeupDuration(?int $value = null, array $options = [])
- * @method array Upgrade(?integer $value = null, array $options = [])
- * @method array OtaUrl(?string $value = null, array $options = [])
+ * @method array Latitude(?string $value = null, array $options = [], \Closure $callback = null)
+ * @method array Longitude(?string $value = null, array $options = [], \Closure $callback = null)
+ * @method array Status(?integer $value = null, array $options = [], \Closure $callback = null)
+ * @method array Power(?integer $value = null, array $options = [], \Closure $callback = null)
+ * @method array Color(?string $value = null, array $options = [], \Closure $callback = null)
+ * @method array Color2(?string $value = null, array $options = [], \Closure $callback = null)
+ * @method array CT(?int $value = null, array $options = [], \Closure $callback = null)
+ * @method array Dimmer(?integer $value = null, array $options = [], \Closure $callback = null)
+ * @method array Fade(?bool $value = null, array $options = [], \Closure $callback = null)
+ * @method array Speed(?integer $value = null, array $options = [], \Closure $callback = null)
+ * @method array Scheme(?integer $value = null, array $options = [], \Closure $callback = null)
+ * @method array LedTable(?bool $value = null, array $options = [], \Closure $callback = null)
+ * @method array Wakeup(?integer $value = null, array $options = [], \Closure $callback = null)
+ * @method array WakeupDuration(?integer $value = null, array $options = [], \Closure $callback = null)
+ * @method array Upgrade(?integer $value = null, array $options = [], \Closure $callback = null)
+ * @method array OtaUrl(?string $value = null, array $options = [], \Closure $callback = null)
  */
 class Request
 {
@@ -34,22 +38,46 @@ class Request
     protected $url;
 
     /**
-     * @param string $url
-     * @param array  $options
+     * @var PromiseInterface[]
+     */
+    protected $promises;
+
+    /**
+     * @var bool
+     */
+    protected $asyncRequests = false;
+
+    public function finish()
+    {
+        all($this->promises)->wait();
+    }
+
+    /**
+     * @param string        $url
+     * @param array         $options
+     * @param \Closure|null $callback
      *
      * @return array
      * @throws UnknownCommandException
      */
-    public function send(string $url, array $options = []): array
+    public function send(string $url, array $options = [], \Closure $callback = null): array
     {
-        $response = $this->client->get($url, $options);
+        if ($callback === null && !$this->asyncRequests) {
+            $response = $this->client->get($url, $options);
+            return $this->handleResponse($response);
+        } else {
+            $this->promises[] = $this->client->getAsync($url, $options)->then(function (ResponseInterface $response) use ($callback) {
+                $result = $this->handleResponse($response);
 
-        $result = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        if (!empty($result['Command']) && $result['Command'] === 'Unknown') {
-            throw new UnknownCommandException('command is unknown');
+                if ($callback !== null) {
+                    $callback($result);
+                }
+            }, function (\Exception $exception) {
+                throw $exception;
+            });
+
+            return [];
         }
-
-        return $result;
     }
 
     /**
@@ -60,7 +88,7 @@ class Request
      */
     public function __call(string $name, array $arguments): array
     {
-        return $this->send($this->url->build($name, array_shift($arguments)), (array) array_shift($arguments));
+        return $this->send($this->url->build($name, array_shift($arguments)), (array) array_shift($arguments),  array_shift($arguments));
     }
 
     /**
@@ -76,7 +104,7 @@ class Request
      * @param Client $client
      * @return Request
      */
-    public function setClient(Client $client): Request
+    public function setClient(Client $client): self
     {
         $this->client = $client;
         return $this;
@@ -95,9 +123,44 @@ class Request
      * @param Url $url
      * @return Request
      */
-    public function setUrl(Url $url): Request
+    public function setUrl(Url $url): self
     {
         $this->url = $url;
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAsyncRequests(): bool
+    {
+        return $this->asyncRequests;
+    }
+
+    /**
+     * @param bool $asyncRequests
+     *
+     * @return Request
+     */
+    public function setAsyncRequests(bool $asyncRequests): self
+    {
+        $this->asyncRequests = $asyncRequests;
+        return $this;
+    }
+
+    /**
+     * @param ResponseInterface $response
+     *
+     * @return array
+     * @throws UnknownCommandException
+     */
+    protected function handleResponse(ResponseInterface $response): array
+    {
+        $result = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        if (!empty($result['Command']) && $result['Command'] === 'Unknown') {
+            throw new UnknownCommandException('command is unknown');
+        }
+
+        return $result;
     }
 }
