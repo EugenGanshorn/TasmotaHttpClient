@@ -47,11 +47,6 @@ class Request
      */
     protected $asyncRequests = false;
 
-    public function finish()
-    {
-        all($this->promises)->wait();
-    }
-
     /**
      * @param string        $url
      * @param array         $options
@@ -130,21 +125,29 @@ class Request
     }
 
     /**
-     * @return bool
+     * @return Request
      */
-    public function isAsyncRequests(): bool
+    public function startAsyncRequests(): self
     {
-        return $this->asyncRequests;
+        $this->asyncRequests = true;
+        return $this;
     }
 
     /**
-     * @param bool $asyncRequests
-     *
      * @return Request
      */
-    public function setAsyncRequests(bool $asyncRequests): self
+    public function stopAsyncRequests(): self
     {
-        $this->asyncRequests = $asyncRequests;
+        $this->asyncRequests = false;
+        return $this;
+    }
+
+    /**
+     * @return Request
+     */
+    public function finishAsyncRquests(): self
+    {
+        all($this->promises)->wait();
         return $this;
     }
 
