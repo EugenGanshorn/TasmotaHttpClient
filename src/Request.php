@@ -147,7 +147,7 @@ class Request
      */
     public function finishAsyncRquests(): self
     {
-        all($this->promises)->wait();
+        all($this->promises)->wait(false);
         return $this;
     }
 
