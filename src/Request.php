@@ -6,9 +6,9 @@ use Closure;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Utils;
-use function GuzzleHttp\Promise\all;
 use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\ResponseInterface;
+use function GuzzleHttp\Promise\all;
 
 /**
  * @method array Latitude(?string $value = null, array $options = [], Closure $callback = null)
@@ -86,7 +86,7 @@ class Request
      */
     public function __call(string $name, array $arguments): array
     {
-        return $this->send($this->url->build($name, array_shift($arguments)), (array) array_shift($arguments),  array_shift($arguments));
+        return $this->send($this->url->build($name, array_shift($arguments)), (array) array_shift($arguments), array_shift($arguments));
     }
 
     /**
