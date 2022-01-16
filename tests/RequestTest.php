@@ -1,6 +1,8 @@
 <?php
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use TasmotaHttpClient\Request;
 use TasmotaHttpClient\UnknownCommandException;
@@ -9,16 +11,12 @@ class RequestTest extends PHPUnit\Framework\TestCase
 {
     public function testClientMethodGetWasCalled(): void
     {
-        $client = $this->createMock(Client::class);
-        $client
-            ->expects($this->once())
-            ->method('__call')
-            ->with(
-                $this->equalTo('get'),
-                $this->equalTo(['http://tasmota.local', []])
-            )
-            ->willReturn(new Response(200, [], '{}'))
-        ;
+        $mock = new MockHandler([
+            new Response(200, [], '{}')
+        ]);
+
+        $handlerStack = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handlerStack]);
 
         $sut = new Request();
         $sut->setClient($client);
@@ -30,16 +28,12 @@ class RequestTest extends PHPUnit\Framework\TestCase
 
     public function testJsonDecodeWorks(): void
     {
-        $client = $this->createMock(Client::class);
-        $client
-            ->expects($this->once())
-            ->method('__call')
-            ->with(
-                $this->equalTo('get'),
-                $this->equalTo(['http://tasmota.local', []])
-            )
-            ->willReturn(new Response(200, [], '{"key": "value"}'))
-        ;
+        $mock = new MockHandler([
+            new Response(200, [], '{"key": "value"}')
+        ]);
+
+        $handlerStack = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handlerStack]);
 
         $sut = new Request();
         $sut->setClient($client);
@@ -51,16 +45,12 @@ class RequestTest extends PHPUnit\Framework\TestCase
 
     public function testJsonDecodeThrowAnExceptionIfJsonIsBroken(): void
     {
-        $client = $this->createMock(Client::class);
-        $client
-            ->expects($this->once())
-            ->method('__call')
-            ->with(
-                $this->equalTo('get'),
-                $this->equalTo(['http://tasmota.local', []])
-            )
-            ->willReturn(new Response(200, [], '{"key: "value"}'))
-        ;
+        $mock = new MockHandler([
+            new Response(200, [], '{"key: "value"}')
+        ]);
+
+        $handlerStack = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handlerStack]);
 
         $sut = new Request();
         $sut->setClient($client);
@@ -71,16 +61,12 @@ class RequestTest extends PHPUnit\Framework\TestCase
 
     public function testUnknownCommandExceptionIsThrown(): void
     {
-        $client = $this->createMock(Client::class);
-        $client
-            ->expects($this->once())
-            ->method('__call')
-            ->with(
-                $this->equalTo('get'),
-                $this->equalTo(['http://tasmota.local', []])
-            )
-            ->willReturn(new Response(200, [], '{"Command": "Unknown"}'))
-        ;
+        $mock = new MockHandler([
+            new Response(200, [], '{"Command": "Unknown"}')
+        ]);
+
+        $handlerStack = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handlerStack]);
 
         $sut = new Request();
         $sut->setClient($client);

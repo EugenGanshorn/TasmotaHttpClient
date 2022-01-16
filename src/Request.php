@@ -2,28 +2,31 @@
 
 namespace TasmotaHttpClient;
 
+use Closure;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Utils;
 use function GuzzleHttp\Promise\all;
 use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * @method array Latitude(?string $value = null, array $options = [], \Closure $callback = null)
- * @method array Longitude(?string $value = null, array $options = [], \Closure $callback = null)
- * @method array Status(?integer $value = null, array $options = [], \Closure $callback = null)
- * @method array Power(?integer $value = null, array $options = [], \Closure $callback = null)
- * @method array Color(?string $value = null, array $options = [], \Closure $callback = null)
- * @method array Color2(?string $value = null, array $options = [], \Closure $callback = null)
- * @method array CT(?int $value = null, array $options = [], \Closure $callback = null)
- * @method array Dimmer(?integer $value = null, array $options = [], \Closure $callback = null)
- * @method array Fade(?bool $value = null, array $options = [], \Closure $callback = null)
- * @method array Speed(?integer $value = null, array $options = [], \Closure $callback = null)
- * @method array Scheme(?integer $value = null, array $options = [], \Closure $callback = null)
- * @method array LedTable(?bool $value = null, array $options = [], \Closure $callback = null)
- * @method array Wakeup(?integer $value = null, array $options = [], \Closure $callback = null)
- * @method array WakeupDuration(?integer $value = null, array $options = [], \Closure $callback = null)
- * @method array Upgrade(?integer $value = null, array $options = [], \Closure $callback = null)
- * @method array OtaUrl(?string $value = null, array $options = [], \Closure $callback = null)
+ * @method array Latitude(?string $value = null, array $options = [], Closure $callback = null)
+ * @method array Longitude(?string $value = null, array $options = [], Closure $callback = null)
+ * @method array Status(?integer $value = null, array $options = [], Closure $callback = null)
+ * @method array Power(?integer $value = null, array $options = [], Closure $callback = null)
+ * @method array Color(?string $value = null, array $options = [], Closure $callback = null)
+ * @method array Color2(?string $value = null, array $options = [], Closure $callback = null)
+ * @method array CT(?int $value = null, array $options = [], Closure $callback = null)
+ * @method array Dimmer(?integer $value = null, array $options = [], Closure $callback = null)
+ * @method array Fade(?bool $value = null, array $options = [], Closure $callback = null)
+ * @method array Speed(?integer $value = null, array $options = [], Closure $callback = null)
+ * @method array Scheme(?integer $value = null, array $options = [], Closure $callback = null)
+ * @method array LedTable(?bool $value = null, array $options = [], Closure $callback = null)
+ * @method array Wakeup(?integer $value = null, array $options = [], Closure $callback = null)
+ * @method array WakeupDuration(?integer $value = null, array $options = [], Closure $callback = null)
+ * @method array Upgrade(?integer $value = null, array $options = [], Closure $callback = null)
+ * @method array OtaUrl(?string $value = null, array $options = [], Closure $callback = null)
  */
 class Request
 {
@@ -50,12 +53,12 @@ class Request
     /**
      * @param string        $url
      * @param array         $options
-     * @param \Closure|null $callback
+     * @param Closure|null $callback
      *
      * @return array
-     * @throws UnknownCommandException
+     * @throws UnknownCommandException|GuzzleException
      */
-    public function send(string $url, array $options = [], \Closure $callback = null): array
+    public function send(string $url, array $options = [], Closure $callback = null): array
     {
         if ($callback === null && !$this->asyncRequests) {
             $response = $this->client->get($url, $options);
@@ -79,7 +82,7 @@ class Request
      * @param string $name
      * @param array $arguments
      * @return array
-     * @throws UnknownCommandException
+     * @throws UnknownCommandException|GuzzleException
      */
     public function __call(string $name, array $arguments): array
     {
@@ -159,7 +162,7 @@ class Request
      */
     protected function handleResponse(ResponseInterface $response): array
     {
-        $result = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        $result = Utils::jsonDecode($response->getBody()->getContents(), true);
         if (!empty($result['Command']) && $result['Command'] === 'Unknown') {
             throw new UnknownCommandException('command is unknown');
         }
